@@ -18,6 +18,7 @@ utils::globalVariables(c(".data", "value", "Category","..density.."))
 
 ImmunoAssay <- setClass("ImmunoAssay", slots = list(data = "data.frame",
                                                     melted.data = "data.frame", exp.name = "character", stats = "list",
+                                                    cv.table = "data.frame",
                                                     outlier.rm = "character", outlier.rm.method = "character", scp.table = "data.frame"))
 
 
@@ -101,18 +102,15 @@ setMethod("calcCvStats", "ImmunoAssay", function(assay.obj, cv.threshold = 20) {
   assay.df <- stats::na.omit(assay.obj@data)
   assay.df.copy <- assay.df
   cv.df <- data.frame(matrix(nrow = nrow(assay.df)))
-
   data.colnames <- colnames(assay.df)[!(colnames(assay.df) %in% c("ID",
                                                                   "Lot"))]
   us_count <- max(unique(stringr::str_count(data.colnames, "_")))
-
   if (us_count == 1) {
     colnames.df <- t(data.frame(strsplit(data.colnames, "_")))
   } else if (us_count == 2) {
     colnames.df <- t(data.frame(strsplit(sub("_", "", data.colnames),
                                          "_")))
   }
-
   means.df <- data.frame(matrix(nrow = nrow(assay.df), ncol = length(unique(colnames.df[,
                                                                                         1]))))
   colnames(means.df) <- unique(colnames.df[, 1])
@@ -195,8 +193,33 @@ setMethod("calcCvStats", "ImmunoAssay", function(assay.obj, cv.threshold = 20) {
                           is.adj.df = is.adj.df)
 
 
-  assay.obj@data <- assay.df.copy
-  assay.obj@melted.data <- assayMelt(assay.df.copy, exp.name = assay.obj@exp.name)
+
+  #assay.obj@data <- assay.df.copy
+  #assay.obj@melted.data <- assayMelt(assay.df.copy, exp.name = assay.obj@exp.name)
+
+  assay.df.melt <- assay.obj@melted.data
+  assay.df.dcast <- dcast(assay.df.melt, DayOperator + Day + Operator + ID + Lot ~ Replicate)
+  assay.df.dcast$xid <- paste0(assay.df.dcast$DayOperator,'_',assay.df.dcast$ID,'_',assay.df.dcast$Lot)
+  cv.df <- (assay.obj@stats$cv.df)
+  cv.df$index <- paste0(assay.df$ID,'_',assay.df$Lot)
+  cv.df.melted <- melt(cv.df)
+  colnames(cv.df.melted) <- c('index','DayOperator','CV')
+  cv.df.melted$xid <- paste0(cv.df.melted$DayOperator,'_',cv.df.melted$index)
+  cv.df.melted$Decision <- ifelse(cv.df.melted$CV < 20,'Keep','Discard')
+
+  discard.xid <- cv.df.melted$xid[cv.df.melted$Decision == 'Discard']
+  adfmelt.xid <- paste0(assay.df.melt$DayOperator,'_',assay.df.melt$ID,'_',assay.df.melt$Lot)
+
+  assay.df.melt$xid <- adfmelt.xid
+  assay.df.melt[assay.df.melt$xid %in% discard.xid,'value'] <- NA
+  assay.df.data <- dcast(assay.df.melt, formula = ID + Lot~variable,fun.aggregate = sum,value.var = "value")
+
+
+  assay.obj@data <- assay.df.data
+  assay.obj@melted.data <- assay.df.melt
+
+  assay.obj@cv.table <- cv.df.melted
+
   assay.obj@outlier.rm <- "yes"
   assay.obj@outlier.rm.method <- c(assay.obj@outlier.rm.method, "cv")
 
