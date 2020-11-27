@@ -198,7 +198,7 @@ setMethod("calcCvStats", "ImmunoAssay", function(assay.obj, cv.threshold = 20) {
   #assay.obj@melted.data <- assayMelt(assay.df.copy, exp.name = assay.obj@exp.name)
 
   assay.df.melt <- assay.obj@melted.data
-  assay.df.dcast <- dcast(assay.df.melt, DayOperator + Day + Operator + ID + Lot ~ Replicate)
+  assay.df.dcast <- reshape2::dcast(assay.df.melt, DayOperator + Day + Operator + ID + Lot ~ Replicate)
   assay.df.dcast$xid <- paste0(assay.df.dcast$DayOperator,'_',assay.df.dcast$ID,'_',assay.df.dcast$Lot)
   cv.df <- (assay.obj@stats$cv.df)
   cv.df$index <- paste0(assay.df$ID,'_',assay.df$Lot)
@@ -212,7 +212,7 @@ setMethod("calcCvStats", "ImmunoAssay", function(assay.obj, cv.threshold = 20) {
 
   assay.df.melt$xid <- adfmelt.xid
   assay.df.melt[assay.df.melt$xid %in% discard.xid,'value'] <- NA
-  assay.df.data <- dcast(assay.df.melt, formula = ID + Lot~variable,fun.aggregate = sum,value.var = "value")
+  assay.df.data <- reshape2::dcast(assay.df.melt, formula = ID + Lot~variable,fun.aggregate = sum,value.var = "value")
 
 
   assay.obj@data <- assay.df.data

@@ -12,7 +12,7 @@ output:
     theme: lumen
 bibliography: bibliography.bib
 vignette: >
-  %\VignetteIndexEntry{Screening Cut Point Determination with rADA}
+  %\VignetteIndexEntry{Screening Cut Point Determination with rADA Supplement}
   %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 ---
@@ -65,6 +65,7 @@ library(forestplot)
 library(ggplot2)
 library(grid)
 library(gridExtra)
+library(reshape2)
 
 ```
 
