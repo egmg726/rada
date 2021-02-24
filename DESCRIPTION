@@ -1,7 +1,7 @@
 Package: rADA
 Title: An R Package for Statistical Analysis and Cut-Point
         Determination of Immunogenicity Assays
-Version: 1.1.2
+Version: 1.1.3
 Authors@R: c(
     person("Emma", "Gail", email = "emmahelengail@gmail.com", role = c("cre", "aut")),
     person("Lidija", "Turkovic", email = "lidijat@gmail.com", role = "aut"),
