@@ -202,7 +202,7 @@ setMethod("calcCvStats", "ImmunoAssay", function(assay.obj, cv.threshold = 20) {
   assay.df.dcast$xid <- paste0(assay.df.dcast$DayOperator,'_',assay.df.dcast$ID,'_',assay.df.dcast$Lot)
   cv.df <- (assay.obj@stats$cv.df)
   cv.df$index <- paste0(assay.df$ID,'_',assay.df$Lot)
-  cv.df.melted <- melt(cv.df)
+  cv.df.melted <- reshape2::melt(cv.df)
   colnames(cv.df.melted) <- c('index','DayOperator','CV')
   cv.df.melted$xid <- paste0(cv.df.melted$DayOperator,'_',cv.df.melted$index)
   cv.df.melted$Decision <- ifelse(cv.df.melted$CV < 20,'Keep','Discard')
